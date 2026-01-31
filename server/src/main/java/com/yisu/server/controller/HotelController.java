@@ -62,9 +62,23 @@ public class HotelController {
     // Merchant: Add/Update Hotel
     @PostMapping("/save")
     public Result<Object> save(@RequestBody Hotel hotel) {
-        if (hotel.getId() == null) {
-            hotel.setStatus(0); // Default to auditing
+        // Any edit or new save by merchant resets status to Auditing (0)
+        // Unless it is a status toggle to OFFLINE (2), which we might allow merchant to do directly?
+        // But requirement says "edit/publish needs audit".
+        // If merchant sets status to 2 (Offline), it's fine. 
+        // If merchant sets status to 1 (Online) -> Must go to 0 (Audit).
+        // If merchant updates info -> Must go to 0 (Audit).
+        
+        // We can check the previous status if needed, but simple logic:
+        // If explicitly setting to Offline (2), allow it.
+        // Otherwise (status 0, 1, or null), force to 0.
+        
+        if (hotel.getStatus() != null && hotel.getStatus() == 2) {
+             // Keep it as 2 (Offline)
+        } else {
+             hotel.setStatus(0); // Force to Auditing
         }
+        
         hotelService.saveOrUpdate(hotel);
         return Result.success();
     }

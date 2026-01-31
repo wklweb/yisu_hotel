@@ -53,9 +53,11 @@
             <div class="action-buttons">
               <el-button v-if="user.role === 'MERCHANT'" link type="primary" icon="Edit" @click="editHotel(scope.row)">编辑</el-button>
               
-              <template v-if="user.role === 'ADMIN' && scope.row.status === 0">
-                 <el-button link type="success" icon="Check" @click="auditHotel(scope.row, 1)">通过</el-button>
-                 <el-button link type="danger" icon="Close" @click="openRejectDialog(scope.row)">拒绝</el-button>
+              <template v-if="user.role === 'ADMIN'">
+                 <el-button v-if="scope.row.status === 0" link type="success" icon="Check" @click="auditHotel(scope.row, 1)">通过</el-button>
+                 <el-button v-if="scope.row.status === 0" link type="danger" icon="Close" @click="openRejectDialog(scope.row)">拒绝</el-button>
+                 <!-- Admin Force Offline -->
+                 <el-button v-if="scope.row.status === 1" link type="warning" icon="VideoPause" @click="auditHotel(scope.row, 2)">强制下线</el-button>
               </template>
               
               <el-button v-if="user.role === 'MERCHANT' && scope.row.status === 1" link type="warning" icon="VideoPause" @click="changeStatus(scope.row, 2)">下线</el-button>
@@ -168,7 +170,14 @@ const auditHotel = (row: any, status: number) => {
 const changeStatus = (row: any, status: number) => {
     const newHotel = { ...row, status }
     request.post('/hotel/save', newHotel).then(() => {
-        ElMessage.success('操作成功')
+        // If merchant tries to put online (status 1), backend forces it to 0 (audit)
+        // If merchant puts offline (status 2), backend keeps 2
+        // We should inform user if it went to audit
+        if (status === 1) {
+            ElMessage.success('已提交审核，请等待管理员通过')
+        } else {
+            ElMessage.success('操作成功')
+        }
         loadData()
     })
 }
