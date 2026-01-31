@@ -10,3 +10,23 @@ ALTER TABLE `hotel` ADD COLUMN `promotion_info` text NULL COMMENT '优惠信息'
 
 -- 3) 快捷标签（用于前台筛选）
 ALTER TABLE `hotel` ADD COLUMN `tags` varchar(255) NULL COMMENT '快捷标签(逗号分隔)' AFTER `facilities`;
+
+-- 4) 房型（room_type）字段补全：用于“房型详情”展示与上架管理
+ALTER TABLE `room_type` ADD COLUMN `status` int NULL DEFAULT 1 COMMENT '0:下架 1:上架' AFTER `stock`;
+ALTER TABLE `room_type` ADD COLUMN `tags` varchar(255) NULL COMMENT '快捷标签(逗号分隔)' AFTER `status`;
+ALTER TABLE `room_type` ADD COLUMN `area_range` varchar(50) NULL COMMENT '面积范围(如35-40㎡)' AFTER `tags`;
+ALTER TABLE `room_type` ADD COLUMN `floor_range` varchar(50) NULL COMMENT '楼层范围(如6-8层)' AFTER `area_range`;
+ALTER TABLE `room_type` ADD COLUMN `wifi_free` tinyint NULL DEFAULT 1 COMMENT 'WiFi是否免费 0/1' AFTER `floor_range`;
+ALTER TABLE `room_type` ADD COLUMN `window_flag` tinyint NULL DEFAULT 1 COMMENT '是否有窗 0/1' AFTER `wifi_free`;
+ALTER TABLE `room_type` ADD COLUMN `no_smoking` tinyint NULL DEFAULT 1 COMMENT '是否禁烟 0/1' AFTER `window_flag`;
+ALTER TABLE `room_type` ADD COLUMN `bed_count` int NULL DEFAULT 1 COMMENT '床数量' AFTER `no_smoking`;
+ALTER TABLE `room_type` ADD COLUMN `bed_type` varchar(50) NULL COMMENT '床型(特大床/双床等)' AFTER `bed_count`;
+ALTER TABLE `room_type` ADD COLUMN `bed_size` varchar(20) NULL COMMENT '床尺寸(如1.81米)' AFTER `bed_type`;
+ALTER TABLE `room_type` ADD COLUMN `extra_bed_allowed` tinyint NULL DEFAULT 0 COMMENT '是否可加床 0/1' AFTER `bed_size`;
+ALTER TABLE `room_type` ADD COLUMN `breakfast_count` int NULL DEFAULT 0 COMMENT '包含早餐份数' AFTER `extra_bed_allowed`;
+ALTER TABLE `room_type` ADD COLUMN `breakfast_type` varchar(50) NULL COMMENT '早餐类型(自助餐等)' AFTER `breakfast_count`;
+ALTER TABLE `room_type` ADD COLUMN `breakfast_dishes` varchar(255) NULL COMMENT '早餐菜品(逗号分隔)' AFTER `breakfast_type`;
+ALTER TABLE `room_type` ADD COLUMN `breakfast_time` varchar(50) NULL COMMENT '早餐时间(如07:30-09:30)' AFTER `breakfast_dishes`;
+ALTER TABLE `room_type` ADD COLUMN `breakfast_extra_price` decimal(10,2) NULL DEFAULT 0.00 COMMENT '早餐成人加价(元/人)' AFTER `breakfast_time`;
+ALTER TABLE `room_type` ADD COLUMN `member_benefits` text NULL COMMENT '会员权益(JSON/文本)' AFTER `breakfast_extra_price`;
+ALTER TABLE `room_type` ADD COLUMN `cancel_policy` text NULL COMMENT '政策与服务(JSON/文本)' AFTER `member_benefits`;
