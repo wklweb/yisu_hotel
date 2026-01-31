@@ -4,7 +4,7 @@
     
     <div class="content-wrapper">
        <el-row :gutter="20">
-          <el-col :span="16">
+          <el-col :span="24">
              <el-card shadow="never" class="section-card">
                 <template #header>
                    <div class="card-header">
@@ -19,6 +19,13 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
+                            <el-form-item label="英文名称">
+                                <el-input v-model="form.nameEn" placeholder="请输入酒店英文名称" />
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row>
+                        <el-col :span="12">
                              <el-form-item label="星级" required>
                                 <el-select v-model="form.starRating" placeholder="请选择星级" style="width: 100%">
                                     <el-option label="1星" value="1星" />
@@ -29,6 +36,11 @@
                                 </el-select>
                             </el-form-item>
                         </el-col>
+                        <el-col :span="12">
+                             <el-form-item label="开业日期">
+                                <el-date-picker v-model="form.openDate" type="date" value-format="YYYY-MM-DD" style="width: 100%" placeholder="选择日期" />
+                            </el-form-item>
+                        </el-col>
                     </el-row>
                     <el-row>
                         <el-col :span="12">
@@ -37,16 +49,19 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                             <el-form-item label="开业日期">
-                                <el-date-picker v-model="form.openDate" type="date" value-format="YYYY-MM-DD" style="width: 100%" placeholder="选择日期" />
+                            <el-form-item label="详细地址" required>
+                                <el-input v-model="form.address" placeholder="请输入详细地址" />
                             </el-form-item>
                         </el-col>
                     </el-row>
-                    <el-form-item label="详细地址" required>
-                        <el-input v-model="form.address" placeholder="请输入详细地址" />
-                    </el-form-item>
                     <el-form-item label="酒店描述">
-                        <el-input v-model="form.description" type="textarea" :rows="4" placeholder="请输入酒店特色描述" />
+                        <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入酒店特色描述" />
+                    </el-form-item>
+                    <el-form-item label="周边环境">
+                        <el-input v-model="form.surroundings" type="textarea" :rows="3" placeholder="请输入周边景点、交通及商场信息" />
+                    </el-form-item>
+                    <el-form-item label="优惠活动">
+                        <el-input v-model="form.promotionInfo" type="textarea" :rows="2" placeholder="请输入打折优惠场景（如：节日8折）" />
                     </el-form-item>
                 </el-form>
              </el-card>
@@ -88,75 +103,49 @@
              <el-card shadow="never" class="section-card" style="margin-top: 20px">
                 <template #header>
                    <div class="card-header">
-                      <span>设施服务</span>
+                      <span>设施与标签</span>
                    </div>
                 </template>
-                 <el-checkbox-group v-model="facilities">
-                    <el-checkbox label="Wifi" border />
-                    <el-checkbox label="停车场" border />
-                    <el-checkbox label="游泳池" border />
-                    <el-checkbox label="健身房" border />
-                    <el-checkbox label="餐厅" border />
-                    <el-checkbox label="会议室" border />
-                    <el-checkbox label="接送机" border />
-                </el-checkbox-group>
+                 <el-form label-width="100px">
+                     <el-form-item label="快捷标签">
+                        <el-select
+                            v-model="tagsList"
+                            multiple
+                            filterable
+                            allow-create
+                            default-first-option
+                            placeholder="请选择或输入标签"
+                            style="width: 100%">
+                            <el-option label="亲子" value="亲子" />
+                            <el-option label="豪华" value="豪华" />
+                            <el-option label="免费停车" value="免费停车" />
+                            <el-option label="情侣" value="情侣" />
+                            <el-option label="商务" value="商务" />
+                            <el-option label="海景" value="海景" />
+                            <el-option label="地铁周边" value="地铁周边" />
+                        </el-select>
+                        <div class="upload-tip">用于前台快速筛选，如：亲子、豪华、免费停车等</div>
+                     </el-form-item>
+                     <el-form-item label="基础设施">
+                         <el-checkbox-group v-model="facilities">
+                            <el-checkbox label="Wifi" border />
+                            <el-checkbox label="停车场" border />
+                            <el-checkbox label="游泳池" border />
+                            <el-checkbox label="健身房" border />
+                            <el-checkbox label="餐厅" border />
+                            <el-checkbox label="会议室" border />
+                            <el-checkbox label="接送机" border />
+                        </el-checkbox-group>
+                     </el-form-item>
+                 </el-form>
              </el-card>
              
              <div class="footer-actions">
-                <el-button type="primary" size="large" @click="save" style="width: 200px">保存并提交</el-button>
+                <el-button type="primary" size="large" round @click="save" style="width: 200px">保存并提交</el-button>
              </div>
-          </el-col>
-          
-          <el-col :span="8">
-             <!-- Room Management Section only visible when editing existing hotel -->
-             <el-card shadow="never" class="section-card" v-if="isEdit">
-                <template #header>
-                   <div class="card-header">
-                      <span>房型管理</span>
-                      <el-button type="primary" link icon="Plus" @click="addRoom">添加</el-button>
-                   </div>
-                </template>
-                <div v-if="rooms.length === 0" class="empty-text">暂无房型数据</div>
-                <div v-else class="room-list">
-                    <div v-for="room in rooms" :key="room.id" class="room-item">
-                        <div class="room-info">
-                            <div class="room-name">{{ room.name }}</div>
-                            <div class="room-price">¥ {{ room.price }}</div>
-                            <div class="room-stock">库存: {{ room.stock }}</div>
-                        </div>
-                        <div class="room-actions">
-                            <el-button type="danger" circle icon="Delete" size="small" @click="deleteRoom(room.id)" />
-                        </div>
-                    </div>
-                </div>
-             </el-card>
-             
-             <el-card shadow="never" class="section-card" style="margin-top: 20px" v-else>
-                 <el-result icon="info" title="提示" sub-title="请先保存酒店基础信息，再添加房型数据"></el-result>
-             </el-card>
           </el-col>
        </el-row>
     </div>
-
-    <el-dialog v-model="roomDialogVisible" title="添加房型" width="400px">
-        <el-form :model="roomForm" label-width="80px">
-            <el-form-item label="房型名称">
-                <el-input v-model="roomForm.name" />
-            </el-form-item>
-            <el-form-item label="价格">
-                <el-input v-model="roomForm.price" type="number">
-                    <template #prefix>¥</template>
-                </el-input>
-            </el-form-item>
-            <el-form-item label="库存">
-                <el-input v-model="roomForm.stock" type="number" />
-            </el-form-item>
-        </el-form>
-        <template #footer>
-            <el-button @click="roomDialogVisible = false">取消</el-button>
-            <el-button type="primary" @click="saveRoom">确定</el-button>
-        </template>
-    </el-dialog>
   </div>
 </template>
 
@@ -165,7 +154,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import request from '../../utils/request'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Plus, Delete } from '@element-plus/icons-vue'
+import { Plus } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -174,37 +163,32 @@ const user = userStr ? JSON.parse(userStr) : {}
 
 const isEdit = computed(() => !!route.params.id)
 const facilities = ref<string[]>([])
+const tagsList = ref<string[]>([])
 const uploadUrl = 'http://localhost:9090/file/upload'
 const fileList = ref<any[]>([])
 
 const form = reactive({
   id: undefined,
   name: '',
+  nameEn: '',
   city: '',
   address: '',
   starRating: '',
   openDate: '',
   description: '',
+  surroundings: '',
+  promotionInfo: '',
   merchantId: user.id,
   facilities: '',
+  tags: '',
   status: 0,
   coverImage: '',
   images: '' // JSON string
 })
 
-const rooms = ref([])
-const roomDialogVisible = ref(false)
-const roomForm = reactive({
-    hotelId: undefined,
-    name: '',
-    price: '',
-    stock: ''
-})
-
 onMounted(() => {
   if (isEdit.value) {
     loadHotel(route.params.id)
-    loadRooms(route.params.id)
   }
 })
 
@@ -213,6 +197,9 @@ const loadHotel = (id: any) => {
     Object.assign(form, res.hotel)
     if (res.hotel.facilities) {
         facilities.value = res.hotel.facilities.split(',')
+    }
+    if (res.hotel.tags) {
+        tagsList.value = res.hotel.tags.split(',')
     }
     // Handle images
     if (res.hotel.images) {
@@ -231,12 +218,6 @@ const loadHotel = (id: any) => {
   })
 }
 
-const loadRooms = (id: any) => {
-    request.get(`/room/list/${id}`).then((res: any) => {
-        rooms.value = res
-    })
-}
-
 const handleCoverSuccess = (res: any) => {
     if(res.code === '200') {
         form.coverImage = res.data
@@ -247,10 +228,6 @@ const handleCoverSuccess = (res: any) => {
 
 const handleCarouselSuccess = (res: any, file: any) => {
     if(res.code === '200') {
-        // file.url is blob, we need real url from res
-        // Element Plus upload list logic is a bit complex, simpler to just track URLs
-        // But here we rely on fileList update
-        // We need to update the file in fileList with real URL
         const idx = fileList.value.findIndex(f => f.uid === file.uid)
         if(idx !== -1) {
             fileList.value[idx].url = res.data
@@ -264,19 +241,20 @@ const handleCarouselRemove = (file: any, uploadFiles: any) => {
 
 const beforeUpload = (file: any) => {
     const isJPG = file.type === 'image/jpeg' || file.type === 'image/png';
-    const isLt2M = file.size / 1024 / 1024 < 2;
+    const isLt2M = file.size / 1024 / 1024 < 10; 
 
     if (!isJPG) {
         ElMessage.error('上传图片只能是 JPG/PNG 格式!');
     }
     if (!isLt2M) {
-        ElMessage.error('上传图片大小不能超过 2MB!');
+        ElMessage.error('上传图片大小不能超过 10MB!');
     }
     return isJPG && isLt2M;
 }
 
 const save = () => {
   form.facilities = facilities.value.join(',')
+  form.tags = tagsList.value.join(',')
   // Process carousel images
   const imageUrls = fileList.value.map(f => f.url || f.response?.data).filter(url => url)
   form.images = JSON.stringify(imageUrls)
@@ -287,26 +265,6 @@ const save = () => {
        router.push('/dashboard')
     }
   })
-}
-
-const addRoom = () => {
-    roomForm.hotelId = form.id
-    roomDialogVisible.value = true
-}
-
-const saveRoom = () => {
-    request.post('/room/save', roomForm).then(() => {
-        ElMessage.success('添加成功')
-        roomDialogVisible.value = false
-        loadRooms(form.id)
-    })
-}
-
-const deleteRoom = (id: number) => {
-    request.delete(`/room/${id}`).then(() => {
-        ElMessage.success('删除成功')
-        loadRooms(form.id)
-    })
 }
 </script>
 
@@ -333,33 +291,6 @@ const deleteRoom = (id: number) => {
     text-align: center;
     margin-top: 30px;
     padding-bottom: 30px;
-}
-.room-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-.room-item:last-child {
-    border-bottom: none;
-}
-.room-name {
-    font-weight: 500;
-    font-size: 16px;
-}
-.room-price {
-    color: #f56c6c;
-    font-weight: bold;
-}
-.room-stock {
-    font-size: 12px;
-    color: #909399;
-}
-.empty-text {
-    text-align: center;
-    color: #909399;
-    padding: 20px;
 }
 .avatar-uploader .avatar {
   width: 178px;

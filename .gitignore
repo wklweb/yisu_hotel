@@ -35,6 +35,10 @@ yarn-error.log*
 .env.local
 .env.*.local
 
+# Uploads (runtime files)
+server/src/main/resources/static/uploads/
+server/server/src/main/resources/static/uploads/
+
 # VS Code
 .vscode/
 *.code-workspace

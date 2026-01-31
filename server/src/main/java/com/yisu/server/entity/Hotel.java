@@ -13,10 +13,14 @@ public class Hotel {
     @TableId(type = IdType.AUTO)
     private Integer id;
     private String name;
+    private String nameEn; // 英文名称
     private String address;
     private String starRating; // 1-5星
     private String description;
+    private String surroundings; // 周边环境：景点、交通、商场
+    private String promotionInfo; // 优惠信息
     private String facilities; // 逗号分隔，如：Wifi,Parking
+    private String tags; // 逗号分隔，快捷标签：亲子,豪华,免费停车
     private LocalDate openDate;
     private Integer status; // 0:审核中, 1:已发布, 2:下线, 3:审核不通过
     private Integer merchantId;

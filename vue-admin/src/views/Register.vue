@@ -31,7 +31,7 @@
              </el-radio-group>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" :loading="loading" @click="register" style="width: 100%">立即注册</el-button>
+            <el-button type="primary" :loading="loading" round @click="register" style="width: 100%">立即注册</el-button>
           </el-form-item>
           <div class="form-footer">
             <router-link to="/login" class="link">已有账号？立即登录</router-link>

@@ -1,11 +1,12 @@
 <template>
   <div class="hotel-list-container">
-    <el-card class="search-card" shadow="never">
+    <!-- Search only for Admin -->
+    <el-card class="search-card" shadow="never" v-if="user.role === 'ADMIN'">
       <el-form :inline="true" :model="query" class="search-form">
         <el-form-item label="酒店名称">
           <el-input v-model="query.name" placeholder="输入酒店名称搜索" clearable />
         </el-form-item>
-        <el-form-item label="审核状态" v-if="user.role === 'ADMIN'">
+        <el-form-item label="审核状态">
           <el-select v-model="query.status" placeholder="全部状态" clearable style="width: 150px">
              <el-option label="审核中" :value="0" />
              <el-option label="已发布" :value="1" />
@@ -14,8 +15,14 @@
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="Search" @click="loadData">查询</el-button>
-          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+          <el-button type="primary" round @click="loadData">
+             <img src="/chaxun.png" style="width: 14px; height: 14px; margin-right: 5px; vertical-align: middle;" />
+             查询
+          </el-button>
+          <el-button round @click="resetQuery">
+             <img src="/chongzhi.png" style="width: 14px; height: 14px; margin-right: 5px; vertical-align: middle;" />
+             重置
+          </el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -23,8 +30,11 @@
     <el-card class="table-card" shadow="never" style="margin-top: 16px">
       <template #header>
         <div class="card-header">
-          <span>酒店列表</span>
-          <el-button v-if="user.role === 'MERCHANT' || user.role === 'ADMIN'" type="primary" icon="Plus" @click="$router.push('/dashboard/hotel-add')">发布酒店</el-button>
+          <span>{{ user.role === 'MERCHANT' ? '我的酒店信息' : '酒店列表' }}</span>
+          <el-button v-if="user.role === 'ADMIN' || (user.role === 'MERCHANT' && tableData.length === 0)" type="primary" round @click="$router.push('/dashboard/hotel-add')">
+             <img src="/fabu.png" style="width: 14px; height: 14px; margin-right: 5px; vertical-align: middle;" />
+             {{ user.role === 'MERCHANT' ? '完善酒店信息' : '发布酒店' }}
+          </el-button>
         </div>
       </template>
       
@@ -60,26 +70,30 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="220" fixed="right" align="center">
+        <el-table-column label="操作" width="300" fixed="right" align="center">
           <template #default="scope">
             <div class="action-buttons">
-              <el-button v-if="user.role === 'MERCHANT' || user.role === 'ADMIN'" link type="primary" icon="Edit" @click="editHotel(scope.row)">编辑</el-button>
-              
-              <template v-if="user.role === 'ADMIN'">
-                 <el-button v-if="scope.row.status === 0" link type="success" icon="Check" @click="auditHotel(scope.row, 1)">通过</el-button>
-                 <el-button v-if="scope.row.status === 0" link type="danger" icon="Close" @click="openRejectDialog(scope.row)">拒绝</el-button>
-                 <!-- Admin Force Offline -->
-                 <el-button v-if="scope.row.status === 1" link type="warning" icon="VideoPause" @click="auditHotel(scope.row, 2)">强制下线</el-button>
+              <!-- Merchant Actions -->
+              <template v-if="user.role === 'MERCHANT'">
+                  <el-button link type="primary" icon="Edit" @click="editHotel(scope.row)">基本信息</el-button>
+                  <el-button link type="primary" icon="House" @click="manageRooms(scope.row.id)">房间管理</el-button>
+                  <el-button v-if="scope.row.status === 1" link type="warning" icon="VideoPause" @click="changeStatus(scope.row, 2)">下线</el-button>
+                  <el-button v-if="scope.row.status === 2" link type="success" icon="VideoPlay" @click="changeStatus(scope.row, 1)">上线</el-button>
               </template>
               
-              <el-button v-if="user.role === 'MERCHANT' && scope.row.status === 1" link type="warning" icon="VideoPause" @click="changeStatus(scope.row, 2)">下线</el-button>
-              <el-button v-if="user.role === 'MERCHANT' && scope.row.status === 2" link type="success" icon="VideoPlay" @click="changeStatus(scope.row, 1)">上线</el-button>
+              <!-- Admin Actions -->
+              <template v-if="user.role === 'ADMIN'">
+                 <el-button link type="primary" icon="Edit" @click="editHotel(scope.row)">编辑</el-button>
+                 <el-button v-if="scope.row.status === 0" link type="success" icon="Check" @click="auditHotel(scope.row, 1)">通过</el-button>
+                 <el-button v-if="scope.row.status === 0" link type="danger" icon="Close" @click="openRejectDialog(scope.row)">拒绝</el-button>
+                 <el-button v-if="scope.row.status === 1" link type="warning" icon="VideoPause" @click="auditHotel(scope.row, 2)">强制下线</el-button>
+              </template>
             </div>
           </template>
         </el-table-column>
       </el-table>
 
-      <div class="pagination-container">
+      <div class="pagination-container" v-if="user.role === 'ADMIN'">
         <el-pagination
           background
           layout="total, prev, pager, next, jumper"
@@ -112,7 +126,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import request from '../../utils/request'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Search, Refresh, Plus, Edit, Check, Close, VideoPause, VideoPlay, Location } from '@element-plus/icons-vue'
+import { Search, Refresh, Plus, Edit, Check, Close, VideoPause, VideoPlay, Location, House } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const userStr = localStorage.getItem('user')
@@ -172,6 +186,10 @@ const editHotel = (row: any) => {
   router.push(`/dashboard/hotel-edit/${row.id}`)
 }
 
+const manageRooms = (hotelId: any) => {
+    router.push(`/dashboard/room-manage/${hotelId}`)
+}
+
 const auditHotel = (row: any, status: number) => {
   request.post('/hotel/audit', { id: row.id, status }).then(() => {
     ElMessage.success('操作成功')
@@ -182,9 +200,6 @@ const auditHotel = (row: any, status: number) => {
 const changeStatus = (row: any, status: number) => {
     const newHotel = { ...row, status }
     request.post('/hotel/save', newHotel).then(() => {
-        // If merchant tries to put online (status 1), backend forces it to 0 (audit)
-        // If merchant puts offline (status 2), backend keeps 2
-        // We should inform user if it went to audit
         if (status === 1) {
             ElMessage.success('已提交审核，请等待管理员通过')
         } else {

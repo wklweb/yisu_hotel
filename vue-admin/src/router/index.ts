@@ -21,15 +21,23 @@ const router = createRouter({
       children: [
         {
           path: '',
-          component: () => import('../views/hotel/List.vue')
+          component: () => import('../views/hotel/List.vue'),
+          meta: { title: '酒店列表' }
         },
         {
           path: 'hotel-add',
-          component: () => import('../views/hotel/Detail.vue')
+          component: () => import('../views/hotel/Detail.vue'),
+          meta: { title: '发布酒店' }
         },
         {
           path: 'hotel-edit/:id',
-          component: () => import('../views/hotel/Detail.vue')
+          component: () => import('../views/hotel/Detail.vue'),
+          meta: { title: '编辑酒店' }
+        },
+        {
+          path: 'room-manage/:hotelId',
+          component: () => import('../views/room/List.vue'),
+          meta: { title: '房型管理' }
         }
       ]
     }

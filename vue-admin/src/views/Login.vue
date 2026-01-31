@@ -19,7 +19,7 @@
             <el-input v-model="form.password" type="password" placeholder="请输入密码" :prefix-icon="Lock" show-password />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" :loading="loading" @click="login" style="width: 100%">立即登录</el-button>
+            <el-button type="primary" :loading="loading" round @click="login" style="width: 100%">立即登录</el-button>
           </el-form-item>
           <div class="form-footer">
             <router-link to="/register" class="link">注册新账号</router-link>
