@@ -18,7 +18,7 @@
             <el-icon><House /></el-icon>
             <span>酒店列表</span>
           </el-menu-item>
-          <el-menu-item index="/dashboard/hotel-add" v-if="user.role === 'MERCHANT'">
+          <el-menu-item index="/dashboard/hotel-add" v-if="user.role === 'MERCHANT' || user.role === 'ADMIN'">
             <el-icon><Plus /></el-icon>
             <span>发布酒店</span>
           </el-menu-item>

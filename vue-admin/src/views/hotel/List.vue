@@ -24,7 +24,7 @@
       <template #header>
         <div class="card-header">
           <span>酒店列表</span>
-          <el-button v-if="user.role === 'MERCHANT'" type="primary" icon="Plus" @click="$router.push('/dashboard/hotel-add')">发布酒店</el-button>
+          <el-button v-if="user.role === 'MERCHANT' || user.role === 'ADMIN'" type="primary" icon="Plus" @click="$router.push('/dashboard/hotel-add')">发布酒店</el-button>
         </div>
       </template>
       
