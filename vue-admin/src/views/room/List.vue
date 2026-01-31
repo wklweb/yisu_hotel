@@ -55,8 +55,9 @@
       </el-table>
     </el-card>
 
-    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑房型' : '添加房型'" width="500px">
-        <el-form :model="form" label-width="100px">
+    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑房型' : '添加房型'" width="760px">
+      <el-scrollbar height="70vh">
+        <el-form :model="form" label-width="110px">
             <el-form-item label="房型名称" required>
                 <el-input v-model="form.name" placeholder="例如：豪华大床房" />
             </el-form-item>
@@ -78,12 +79,12 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="价格" required>
-                <el-input v-model="form.price" type="number" placeholder="请输入价格">
-                    <template #prefix>¥</template>
-                </el-input>
+                <el-input-number v-model="form.price" :min="0" :step="1" :precision="2" style="width: 260px" />
+                <span style="margin-left: 8px; color:#909399;">元</span>
             </el-form-item>
             <el-form-item label="库存" required>
-                <el-input v-model="form.stock" type="number" placeholder="请输入库存数量" />
+                <el-input-number v-model="form.stock" :min="0" :step="1" style="width: 260px" />
+                <span style="margin-left: 8px; color:#909399;">间</span>
             </el-form-item>
             <el-form-item label="上架状态">
                 <el-switch v-model="form.status" :active-value="1" :inactive-value="0" />
@@ -98,11 +99,29 @@
                     <el-button v-else type="primary" plain>上传图片</el-button>
                 </el-upload>
             </el-form-item>
-            <el-form-item label="面积范围">
-                <el-input v-model="form.areaRange" placeholder="如：35-40㎡" />
+            <el-form-item label="面积范围" required>
+              <el-row :gutter="10" style="width: 100%">
+                <el-col :span="8">
+                  <el-input-number v-model="areaMin" :min="0" :step="1" style="width: 100%" />
+                </el-col>
+                <el-col :span="1" style="display:flex;align-items:center;justify-content:center;color:#909399;">-</el-col>
+                <el-col :span="8">
+                  <el-input-number v-model="areaMax" :min="0" :step="1" style="width: 100%" />
+                </el-col>
+                <el-col :span="3" style="display:flex;align-items:center;color:#909399;">㎡</el-col>
+              </el-row>
             </el-form-item>
-            <el-form-item label="楼层范围">
-                <el-input v-model="form.floorRange" placeholder="如：6-8层" />
+            <el-form-item label="楼层范围" required>
+              <el-row :gutter="10" style="width: 100%">
+                <el-col :span="8">
+                  <el-input-number v-model="floorMin" :min="0" :step="1" style="width: 100%" />
+                </el-col>
+                <el-col :span="1" style="display:flex;align-items:center;justify-content:center;color:#909399;">-</el-col>
+                <el-col :span="8">
+                  <el-input-number v-model="floorMax" :min="0" :step="1" style="width: 100%" />
+                </el-col>
+                <el-col :span="3" style="display:flex;align-items:center;color:#909399;">层</el-col>
+              </el-row>
             </el-form-item>
             <el-form-item label="基础配置">
                 <el-checkbox v-model="wifiFreeChecked" label="Wi-Fi 免费" />
@@ -112,13 +131,19 @@
             <el-form-item label="床信息">
                 <el-row :gutter="10" style="width: 100%">
                     <el-col :span="8">
-                        <el-input v-model="form.bedCount" type="number" placeholder="数量" />
+                        <el-input-number v-model="form.bedCount" :min="0" :step="1" style="width: 100%" />
                     </el-col>
                     <el-col :span="8">
-                        <el-input v-model="form.bedType" placeholder="床型(特大床)" />
+                        <el-select v-model="form.bedType" placeholder="床型" style="width: 100%">
+                          <el-option label="特大床" value="特大床" />
+                          <el-option label="大床" value="大床" />
+                          <el-option label="双床" value="双床" />
+                          <el-option label="单人床" value="单人床" />
+                        </el-select>
                     </el-col>
                     <el-col :span="8">
-                        <el-input v-model="form.bedSize" placeholder="尺寸(1.81米)" />
+                        <el-input-number v-model="bedSize" :min="0" :step="0.01" :precision="2" style="width: 100%" />
+                        <div style="font-size: 12px; color:#909399; margin-top: 4px">单位：米</div>
                     </el-col>
                 </el-row>
             </el-form-item>
@@ -128,23 +153,42 @@
             <el-form-item label="早餐信息">
                 <el-row :gutter="10" style="width: 100%">
                     <el-col :span="8">
-                        <el-input v-model="form.breakfastCount" type="number" placeholder="份数(如2)" />
+                        <el-input-number v-model="form.breakfastCount" :min="0" :step="1" style="width: 100%" />
                     </el-col>
                     <el-col :span="8">
                         <el-input v-model="form.breakfastType" placeholder="类型(自助餐)" />
                     </el-col>
                     <el-col :span="8">
-                        <el-input v-model="form.breakfastTime" placeholder="时间(07:30-09:30)" />
+                        <el-time-picker
+                          v-model="breakfastTimeRange"
+                          is-range
+                          value-format="HH:mm"
+                          format="HH:mm"
+                          range-separator="-"
+                          start-placeholder="开始"
+                          end-placeholder="结束"
+                          style="width: 100%"
+                        />
                     </el-col>
                 </el-row>
             </el-form-item>
             <el-form-item label="早餐菜品">
-                <el-input v-model="form.breakfastDishes" placeholder="如：中式,清真餐,素食" />
+              <el-select
+                v-model="breakfastDishesList"
+                multiple
+                filterable
+                allow-create
+                default-first-option
+                placeholder="如：中式、清真餐、素食"
+                style="width: 100%">
+                <el-option label="中式" value="中式" />
+                <el-option label="清真餐" value="清真餐" />
+                <el-option label="素食" value="素食" />
+              </el-select>
             </el-form-item>
             <el-form-item label="早餐加价">
-                <el-input v-model="form.breakfastExtraPrice" type="number" placeholder="成人加价(元/人)">
-                    <template #prefix>¥</template>
-                </el-input>
+                <el-input-number v-model="form.breakfastExtraPrice" :min="0" :step="1" :precision="2" style="width: 260px" />
+                <span style="margin-left: 8px; color:#909399;">元/人</span>
             </el-form-item>
             <el-form-item label="描述">
                 <el-input v-model="form.description" type="textarea" />
@@ -156,6 +200,7 @@
                 <el-input v-model="form.cancelPolicy" type="textarea" :rows="3" placeholder="取消规则等（可填写要点或JSON）" />
             </el-form-item>
         </el-form>
+      </el-scrollbar>
         <template #footer>
             <el-button @click="dialogVisible = false">取消</el-button>
             <el-button type="primary" @click="save">确定</el-button>
@@ -185,6 +230,13 @@ const wifiFreeChecked = ref(true)
 const windowChecked = ref(true)
 const noSmokingChecked = ref(true)
 const extraBedChecked = ref(false)
+const breakfastDishesList = ref<string[]>([])
+const breakfastTimeRange = ref<string[]>([])
+const areaMin = ref<number | null>(null)
+const areaMax = ref<number | null>(null)
+const floorMin = ref<number | null>(null)
+const floorMax = ref<number | null>(null)
+const bedSize = ref<number | null>(1.81)
 
 const form = reactive({
     id: undefined,
@@ -213,6 +265,13 @@ const form = reactive({
     memberBenefits: '',
     cancelPolicy: ''
 })
+
+const parseRangeNumbers = (value: string | undefined | null) => {
+    if (!value) return []
+    const nums = value.match(/(\d+(\.\d+)?)/g)
+    if (!nums) return []
+    return nums.map(n => parseFloat(n)).filter(n => !Number.isNaN(n))
+}
 
 const loadData = () => {
     loading.value = true
@@ -254,6 +313,15 @@ const addRoom = () => {
     form.breakfastExtraPrice = 0
     form.memberBenefits = ''
     form.cancelPolicy = ''
+
+    // strict inputs
+    areaMin.value = null
+    areaMax.value = null
+    floorMin.value = null
+    floorMax.value = null
+    bedSize.value = 1.81
+    breakfastTimeRange.value = []
+    breakfastDishesList.value = []
     dialogVisible.value = true
 }
 
@@ -265,6 +333,21 @@ const editRoom = (row: any) => {
     windowChecked.value = row.windowFlag === 1
     noSmokingChecked.value = row.noSmoking === 1
     extraBedChecked.value = row.extraBedAllowed === 1
+
+    // strict inputs - parse formatted strings
+    const areaNums = parseRangeNumbers(row.areaRange)
+    areaMin.value = areaNums.length > 0 ? areaNums[0] : null
+    areaMax.value = areaNums.length > 1 ? areaNums[1] : areaMin.value
+
+    const floorNums = parseRangeNumbers(row.floorRange)
+    floorMin.value = floorNums.length > 0 ? floorNums[0] : null
+    floorMax.value = floorNums.length > 1 ? floorNums[1] : floorMin.value
+
+    const bedNums = parseRangeNumbers(row.bedSize)
+    bedSize.value = bedNums.length > 0 ? bedNums[0] : null
+
+    breakfastDishesList.value = row.breakfastDishes ? row.breakfastDishes.split(',') : []
+    breakfastTimeRange.value = row.breakfastTime ? String(row.breakfastTime).split('-') : []
     dialogVisible.value = true
 }
 
@@ -289,11 +372,38 @@ const save = () => {
         ElMessage.warning('请填写完整信息')
         return
     }
+    if (areaMin.value == null || areaMax.value == null) {
+        ElMessage.warning('请填写面积范围（数字）')
+        return
+    }
+    if (floorMin.value == null || floorMax.value == null) {
+        ElMessage.warning('请填写楼层范围（数字）')
+        return
+    }
+    if (bedSize.value == null) {
+        ElMessage.warning('请填写床尺寸（数字，单位：米）')
+        return
+    }
     form.tags = tagsList.value.join(',')
     form.wifiFree = wifiFreeChecked.value ? 1 : 0
     form.windowFlag = windowChecked.value ? 1 : 0
     form.noSmoking = noSmokingChecked.value ? 1 : 0
     form.extraBedAllowed = extraBedChecked.value ? 1 : 0
+
+    // format strict values into backend string fields
+    const a1 = Math.min(areaMin.value, areaMax.value)
+    const a2 = Math.max(areaMin.value, areaMax.value)
+    form.areaRange = `${a1}-${a2}㎡`
+
+    const f1 = Math.min(floorMin.value, floorMax.value)
+    const f2 = Math.max(floorMin.value, floorMax.value)
+    form.floorRange = `${f1}-${f2}层`
+
+    form.bedSize = `${bedSize.value}米`
+
+    form.breakfastDishes = breakfastDishesList.value.join(',')
+    form.breakfastTime = breakfastTimeRange.value && breakfastTimeRange.value.length === 2 ? `${breakfastTimeRange.value[0]}-${breakfastTimeRange.value[1]}` : ''
+
     request.post('/room/save', form).then(() => {
         ElMessage.success('保存成功')
         dialogVisible.value = false
