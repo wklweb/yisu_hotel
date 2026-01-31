@@ -21,6 +21,7 @@ public class Hotel {
     private Integer status; // 0:审核中, 1:已发布, 2:下线, 3:审核不通过
     private Integer merchantId;
     private String images; // JSON or comma separated
+    private String coverImage; // 封面图
     private BigDecimal minPrice;
     private String rejectReason; // 审核不通过原因
     private String city; // 城市，用于筛选

@@ -30,10 +30,22 @@
       
       <el-table :data="tableData" v-loading="loading" border stripe style="width: 100%">
         <el-table-column prop="id" label="ID" width="80" align="center" />
-        <el-table-column label="酒店信息" min-width="200">
+        <el-table-column label="酒店信息" min-width="250">
            <template #default="scope">
-             <div style="font-weight: bold">{{ scope.row.name }}</div>
-             <div style="color: #909399; font-size: 12px">{{ scope.row.city }}</div>
+             <div class="hotel-info">
+                 <el-image 
+                    v-if="scope.row.coverImage" 
+                    :src="scope.row.coverImage" 
+                    class="hotel-cover" 
+                    fit="cover"
+                    :preview-src-list="[scope.row.coverImage]">
+                 </el-image>
+                 <div class="info-text">
+                     <div class="name">{{ scope.row.name }}</div>
+                     <div class="address"><el-icon><Location /></el-icon> {{ scope.row.city }} {{ scope.row.address }}</div>
+                     <div class="price">¥ {{ scope.row.minPrice }} 起</div>
+                 </div>
+             </div>
            </template>
         </el-table-column>
         <el-table-column prop="starRating" label="星级" width="120" align="center">
@@ -51,7 +63,7 @@
         <el-table-column label="操作" width="220" fixed="right" align="center">
           <template #default="scope">
             <div class="action-buttons">
-              <el-button v-if="user.role === 'MERCHANT'" link type="primary" icon="Edit" @click="editHotel(scope.row)">编辑</el-button>
+              <el-button v-if="user.role === 'MERCHANT' || user.role === 'ADMIN'" link type="primary" icon="Edit" @click="editHotel(scope.row)">编辑</el-button>
               
               <template v-if="user.role === 'ADMIN'">
                  <el-button v-if="scope.row.status === 0" link type="success" icon="Check" @click="auditHotel(scope.row, 1)">通过</el-button>
@@ -100,7 +112,7 @@ import { ref, reactive, onMounted, computed } from 'vue'
 import request from '../../utils/request'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Search, Refresh, Plus, Edit, Check, Close, VideoPause, VideoPlay } from '@element-plus/icons-vue'
+import { Search, Refresh, Plus, Edit, Check, Close, VideoPause, VideoPlay, Location } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const userStr = localStorage.getItem('user')
@@ -237,5 +249,44 @@ onMounted(() => {
 }
 .action-buttons .el-button {
     margin-left: 5px;
+}
+.hotel-info {
+    display: flex;
+    align-items: center;
+}
+.hotel-cover {
+    width: 80px;
+    height: 60px;
+    border-radius: 4px;
+    margin-right: 12px;
+    flex-shrink: 0;
+    background: #f0f0f0;
+}
+.info-text {
+    flex: 1;
+    overflow: hidden;
+}
+.name {
+    font-weight: bold;
+    font-size: 15px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.address {
+    font-size: 12px;
+    color: #909399;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+}
+.price {
+    color: #f56c6c;
+    font-weight: bold;
+    font-size: 14px;
 }
 </style>

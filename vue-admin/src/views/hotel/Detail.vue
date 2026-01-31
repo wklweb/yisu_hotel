@@ -54,6 +54,40 @@
              <el-card shadow="never" class="section-card" style="margin-top: 20px">
                 <template #header>
                    <div class="card-header">
+                      <span>图片管理</span>
+                   </div>
+                </template>
+                <el-form label-width="100px">
+                    <el-form-item label="封面图片" required>
+                        <el-upload
+                            class="avatar-uploader"
+                            :action="uploadUrl"
+                            :show-file-list="false"
+                            :on-success="handleCoverSuccess"
+                            :before-upload="beforeUpload">
+                            <img v-if="form.coverImage" :src="form.coverImage" class="avatar" />
+                            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+                        </el-upload>
+                        <div class="upload-tip">建议尺寸 800x600，仅限一张</div>
+                    </el-form-item>
+                    <el-form-item label="轮播图片">
+                        <el-upload
+                            v-model:file-list="fileList"
+                            :action="uploadUrl"
+                            list-type="picture-card"
+                            :on-success="handleCarouselSuccess"
+                            :on-remove="handleCarouselRemove"
+                            :before-upload="beforeUpload">
+                            <el-icon><Plus /></el-icon>
+                        </el-upload>
+                        <div class="upload-tip">展示在详情页顶部的轮播图，支持多张</div>
+                    </el-form-item>
+                </el-form>
+             </el-card>
+
+             <el-card shadow="never" class="section-card" style="margin-top: 20px">
+                <template #header>
+                   <div class="card-header">
                       <span>设施服务</span>
                    </div>
                 </template>
@@ -140,6 +174,8 @@ const user = userStr ? JSON.parse(userStr) : {}
 
 const isEdit = computed(() => !!route.params.id)
 const facilities = ref<string[]>([])
+const uploadUrl = 'http://localhost:9090/file/upload'
+const fileList = ref<any[]>([])
 
 const form = reactive({
   id: undefined,
@@ -151,7 +187,9 @@ const form = reactive({
   description: '',
   merchantId: user.id,
   facilities: '',
-  status: 0
+  status: 0,
+  coverImage: '',
+  images: '' // JSON string
 })
 
 const rooms = ref([])
@@ -176,6 +214,20 @@ const loadHotel = (id: any) => {
     if (res.hotel.facilities) {
         facilities.value = res.hotel.facilities.split(',')
     }
+    // Handle images
+    if (res.hotel.images) {
+        try {
+            const imgs = JSON.parse(res.hotel.images)
+            fileList.value = imgs.map((url: string) => ({ name: 'img', url }))
+        } catch (e) {
+            // fallback if not json
+            if(res.hotel.images.includes(',')) {
+                 fileList.value = res.hotel.images.split(',').map((url: string) => ({ name: 'img', url }))
+            } else {
+                 fileList.value = [{ name: 'img', url: res.hotel.images }]
+            }
+        }
+    }
   })
 }
 
@@ -185,8 +237,50 @@ const loadRooms = (id: any) => {
     })
 }
 
+const handleCoverSuccess = (res: any) => {
+    if(res.code === '200') {
+        form.coverImage = res.data
+    } else {
+        ElMessage.error('上传失败')
+    }
+}
+
+const handleCarouselSuccess = (res: any, file: any) => {
+    if(res.code === '200') {
+        // file.url is blob, we need real url from res
+        // Element Plus upload list logic is a bit complex, simpler to just track URLs
+        // But here we rely on fileList update
+        // We need to update the file in fileList with real URL
+        const idx = fileList.value.findIndex(f => f.uid === file.uid)
+        if(idx !== -1) {
+            fileList.value[idx].url = res.data
+        }
+    }
+}
+
+const handleCarouselRemove = (file: any, uploadFiles: any) => {
+    // fileList is synced automatically
+}
+
+const beforeUpload = (file: any) => {
+    const isJPG = file.type === 'image/jpeg' || file.type === 'image/png';
+    const isLt2M = file.size / 1024 / 1024 < 2;
+
+    if (!isJPG) {
+        ElMessage.error('上传图片只能是 JPG/PNG 格式!');
+    }
+    if (!isLt2M) {
+        ElMessage.error('上传图片大小不能超过 2MB!');
+    }
+    return isJPG && isLt2M;
+}
+
 const save = () => {
   form.facilities = facilities.value.join(',')
+  // Process carousel images
+  const imageUrls = fileList.value.map(f => f.url || f.response?.data).filter(url => url)
+  form.images = JSON.stringify(imageUrls)
+  
   request.post('/hotel/save', form).then((res: any) => {
     ElMessage.success('保存成功')
     if(!isEdit.value) {
@@ -266,5 +360,33 @@ const deleteRoom = (id: number) => {
     text-align: center;
     color: #909399;
     padding: 20px;
+}
+.avatar-uploader .avatar {
+  width: 178px;
+  height: 178px;
+  display: block;
+}
+.avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
+}
+.upload-tip {
+    font-size: 12px;
+    color: #909399;
+    margin-top: 5px;
 }
 </style>
