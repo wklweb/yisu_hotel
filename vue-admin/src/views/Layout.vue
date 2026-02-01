@@ -36,13 +36,19 @@
           <div class="header-right">
             <el-dropdown @command="handleCommand">
               <span class="user-dropdown">
-                <el-avatar :size="30" icon="UserFilled" style="margin-right: 8px; background: #409EFF" />
+                <el-avatar 
+                  :size="30" 
+                  :src="user.avatar" 
+                  icon="UserFilled" 
+                  style="margin-right: 8px; background: #409EFF" 
+                />
                 {{ user.username }}
                 <el-icon class="el-icon--right"><arrow-down /></el-icon>
               </span>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+                  <el-dropdown-item command="profile">个人中心</el-dropdown-item>
+                  <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -62,17 +68,56 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { House, Plus, OfficeBuilding, ArrowDown, UserFilled } from '@element-plus/icons-vue'
 
 const router = useRouter()
-const userStr = localStorage.getItem('user')
-const user = userStr ? JSON.parse(userStr) : { username: 'Guest', role: 'MERCHANT' }
+
+// 使用响应式的 ref 存储用户信息
+const user = ref({
+  username: 'Guest',
+  role: 'MERCHANT',
+  avatar: '',
+  phone: '',
+  email: ''
+})
+
+// 从 localStorage 加载用户信息
+const loadUser = () => {
+  const userStr = localStorage.getItem('user')
+  if (userStr) {
+    try {
+      const userData = JSON.parse(userStr)
+      user.value = { ...user.value, ...userData }
+    } catch (e) {
+      console.error('Failed to parse user data:', e)
+    }
+  }
+}
+
+// 监听自定义事件，当用户信息更新时刷新
+const handleUserUpdate = () => {
+  loadUser()
+}
+
+onMounted(() => {
+  loadUser()
+  // 监听用户信息更新事件
+  window.addEventListener('user-updated', handleUserUpdate)
+})
+
+onUnmounted(() => {
+  // 清理事件监听
+  window.removeEventListener('user-updated', handleUserUpdate)
+})
 
 const handleCommand = (command: string) => {
   if (command === 'logout') {
     localStorage.clear()
     router.push('/login')
+  } else if (command === 'profile') {
+    router.push('/dashboard/profile')
   }
 }
 </script>

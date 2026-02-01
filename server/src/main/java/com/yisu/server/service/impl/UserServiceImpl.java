@@ -42,4 +42,55 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         save(user);
     }
+
+    @Override
+    public User getCurrentUser(Integer userId) {
+        User user = getById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        user.setPassword(null); // Hide password
+        return user;
+    }
+
+    @Override
+    public void updateProfile(User user) {
+        if (user.getId() == null) {
+            throw new RuntimeException("用户ID不能为空");
+        }
+        User existing = getById(user.getId());
+        if (existing == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        // 只更新允许修改的字段：phone, email, avatar
+        if (StrUtil.isNotBlank(user.getPhone())) {
+            existing.setPhone(user.getPhone());
+        }
+        if (StrUtil.isNotBlank(user.getEmail())) {
+            existing.setEmail(user.getEmail());
+        }
+        if (StrUtil.isNotBlank(user.getAvatar())) {
+            existing.setAvatar(user.getAvatar());
+        }
+        updateById(existing);
+    }
+
+    @Override
+    public void updatePassword(Integer userId, String oldPassword, String newPassword) {
+        if (userId == null) {
+            throw new RuntimeException("用户ID不能为空");
+        }
+        if (StrUtil.isBlank(oldPassword) || StrUtil.isBlank(newPassword)) {
+            throw new RuntimeException("原密码和新密码不能为空");
+        }
+        User user = getById(userId);
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        if (!user.getPassword().equals(oldPassword)) {
+            throw new RuntimeException("原密码错误");
+        }
+        user.setPassword(newPassword);
+        updateById(user);
+    }
 }

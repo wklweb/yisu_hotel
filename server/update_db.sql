@@ -30,3 +30,6 @@ ALTER TABLE `room_type` ADD COLUMN `breakfast_time` varchar(50) NULL COMMENT '�
 ALTER TABLE `room_type` ADD COLUMN `breakfast_extra_price` decimal(10,2) NULL DEFAULT 0.00 COMMENT '早餐成人加价(元/人)' AFTER `breakfast_time`;
 ALTER TABLE `room_type` ADD COLUMN `member_benefits` text NULL COMMENT '会员权益(JSON/文本)' AFTER `breakfast_extra_price`;
 ALTER TABLE `room_type` ADD COLUMN `cancel_policy` text NULL COMMENT '政策与服务(JSON/文本)' AFTER `member_benefits`;
+
+-- 5) 用户表添加邮箱字段
+ALTER TABLE `sys_user` ADD COLUMN `email` varchar(100) NULL COMMENT '邮箱' AFTER `phone`;

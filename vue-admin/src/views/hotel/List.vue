@@ -58,7 +58,7 @@
              </div>
            </template>
         </el-table-column>
-        <el-table-column prop="starRating" label="星级" width="120" align="center">
+        <el-table-column prop="starRating" label="星级" width="150" align="center">
            <template #default="scope">
              <el-rate v-model="starRatings[scope.$index]" disabled text-color="#ff9900" />
            </template>

@@ -38,6 +38,11 @@ const router = createRouter({
           path: 'room-manage/:hotelId',
           component: () => import('../views/room/List.vue'),
           meta: { title: '房型管理' }
+        },
+        {
+          path: 'profile',
+          component: () => import('../views/Profile.vue'),
+          meta: { title: '个人中心' }
         }
       ]
     }

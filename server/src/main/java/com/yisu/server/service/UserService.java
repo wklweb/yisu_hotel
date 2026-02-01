@@ -7,4 +7,7 @@ import com.yisu.server.entity.User;
 public interface UserService extends IService<User> {
     LoginResult login(User user);
     void register(User user);
+    User getCurrentUser(Integer userId);
+    void updateProfile(User user);
+    void updatePassword(Integer userId, String oldPassword, String newPassword);
 }
