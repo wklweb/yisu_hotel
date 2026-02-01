@@ -22,6 +22,10 @@
             <el-icon><Plus /></el-icon>
             <span>发布酒店</span>
           </el-menu-item>
+          <el-menu-item index="/dashboard/user-manage" v-if="user.role === 'ADMIN'">
+            <el-icon><User /></el-icon>
+            <span>酒店账号管理</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
       
@@ -70,7 +74,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { House, Plus, OfficeBuilding, ArrowDown, UserFilled } from '@element-plus/icons-vue'
+import { House, Plus, OfficeBuilding, ArrowDown, UserFilled, User } from '@element-plus/icons-vue'
 
 const router = useRouter()
 

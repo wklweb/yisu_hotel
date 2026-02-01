@@ -43,6 +43,11 @@ const router = createRouter({
           path: 'profile',
           component: () => import('../views/Profile.vue'),
           meta: { title: '个人中心' }
+        },
+        {
+          path: 'user-manage',
+          component: () => import('../views/user/List.vue'),
+          meta: { title: '酒店账号管理' }
         }
       ]
     }

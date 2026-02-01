@@ -58,3 +58,6 @@ CREATE TABLE IF NOT EXISTS `hotel_favorite` (
   UNIQUE INDEX `uk_hotel_user` (`hotel_id`, `user_id`) USING BTREE COMMENT '同一用户不能重复收藏同一酒店',
   INDEX `idx_user_id` (`user_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic COMMENT = '酒店收藏表';
+
+-- 8) 用户表添加状态字段
+ALTER TABLE `sys_user` ADD COLUMN `status` int NULL DEFAULT 0 COMMENT '0:正常, 1:禁用' AFTER `role`;
