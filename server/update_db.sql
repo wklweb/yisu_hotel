@@ -33,3 +33,28 @@ ALTER TABLE `room_type` ADD COLUMN `cancel_policy` text NULL COMMENT '政策与�
 
 -- 5) 用户表添加邮箱字段
 ALTER TABLE `sys_user` ADD COLUMN `email` varchar(100) NULL COMMENT '邮箱' AFTER `phone`;
+
+-- 6) 创建酒店点评表
+CREATE TABLE IF NOT EXISTS `hotel_review` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `hotel_id` int NOT NULL COMMENT '酒店ID',
+  `user_id` int NOT NULL COMMENT '用户ID',
+  `rating` int NOT NULL DEFAULT 5 COMMENT '评分 1-5',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '点评内容',
+  `images` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '点评图片(JSON数组)',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_hotel_id` (`hotel_id`) USING BTREE,
+  INDEX `idx_user_id` (`user_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic COMMENT = '酒店点评表';
+
+-- 7) 创建酒店收藏表
+CREATE TABLE IF NOT EXISTS `hotel_favorite` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `hotel_id` int NOT NULL COMMENT '酒店ID',
+  `user_id` int NOT NULL COMMENT '用户ID',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '收藏时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_hotel_user` (`hotel_id`, `user_id`) USING BTREE COMMENT '同一用户不能重复收藏同一酒店',
+  INDEX `idx_user_id` (`user_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic COMMENT = '酒店收藏表';

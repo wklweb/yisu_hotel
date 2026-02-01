@@ -70,6 +70,16 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="reviewCount" label="点评数量" width="100" align="center">
+          <template #default="scope">
+            <span>{{ scope.row.reviewCount ?? 0 }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="favoriteCount" label="收藏量" width="100" align="center">
+          <template #default="scope">
+            <span>{{ scope.row.favoriteCount ?? 0 }}</span>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="300" fixed="right" align="center">
           <template #default="scope">
             <div class="action-buttons">

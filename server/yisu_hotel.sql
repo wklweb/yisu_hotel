@@ -123,4 +123,35 @@ INSERT INTO `room_type` VALUES (2, 1, '行政套房', 1599.00, '80平米，包�
 INSERT INTO `room_type` VALUES (3, 2, '亲子主题房', 699.00, '卡通主题装饰', NULL, 20, 0);
 INSERT INTO `room_type` VALUES (4, 2, '标准双床房', 599.00, '舒适双床，性价比高', NULL, 30, 0);
 
+-- ----------------------------
+-- Table structure for hotel_review
+-- ----------------------------
+DROP TABLE IF EXISTS `hotel_review`;
+CREATE TABLE `hotel_review`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `hotel_id` int NOT NULL COMMENT '酒店ID',
+  `user_id` int NOT NULL COMMENT '用户ID',
+  `rating` int NOT NULL DEFAULT 5 COMMENT '评分 1-5',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '点评内容',
+  `images` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL COMMENT '点评图片(JSON数组)',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_hotel_id` (`hotel_id`) USING BTREE,
+  INDEX `idx_user_id` (`user_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic COMMENT = '酒店点评表';
+
+-- ----------------------------
+-- Table structure for hotel_favorite
+-- ----------------------------
+DROP TABLE IF EXISTS `hotel_favorite`;
+CREATE TABLE `hotel_favorite`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `hotel_id` int NOT NULL COMMENT '酒店ID',
+  `user_id` int NOT NULL COMMENT '用户ID',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '收藏时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_hotel_user` (`hotel_id`, `user_id`) USING BTREE COMMENT '同一用户不能重复收藏同一酒店',
+  INDEX `idx_user_id` (`user_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic COMMENT = '酒店收藏表';
+
 SET FOREIGN_KEY_CHECKS = 1;

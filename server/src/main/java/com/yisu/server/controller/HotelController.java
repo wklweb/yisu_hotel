@@ -8,12 +8,15 @@ import com.yisu.server.entity.Hotel;
 import com.yisu.server.entity.RoomType;
 import com.yisu.server.service.HotelService;
 import com.yisu.server.service.RoomTypeService;
+import com.yisu.server.service.HotelReviewService;
+import com.yisu.server.service.HotelFavoriteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/hotel")
@@ -25,10 +28,16 @@ public class HotelController {
     
     @Autowired
     private RoomTypeService roomTypeService;
+    
+    @Autowired
+    private HotelReviewService reviewService;
+    
+    @Autowired
+    private HotelFavoriteService favoriteService;
 
-    // Public: List Hotels (Search)
+    // Public: List Hotels (Search) - for Android
     @GetMapping("/list")
-    public Result<Page<Hotel>> list(@RequestParam(defaultValue = "1") Integer pageNum,
+    public Result<Page<Map<String, Object>>> list(@RequestParam(defaultValue = "1") Integer pageNum,
                                     @RequestParam(defaultValue = "10") Integer pageSize,
                                     @RequestParam(required = false) String name,
                                     @RequestParam(required = false) String city,
@@ -45,7 +54,38 @@ public class HotelController {
         if (StrUtil.isNotBlank(starRating)) {
             queryWrapper.eq("star_rating", starRating);
         }
-        return Result.success(hotelService.page(page, queryWrapper));
+        Page<Hotel> hotelPage = hotelService.page(page, queryWrapper);
+        
+        // 转换为包含统计信息的Map列表（供Android使用）
+        List<Map<String, Object>> hotelList = hotelPage.getRecords().stream().map(hotel -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", hotel.getId());
+            map.put("name", hotel.getName());
+            map.put("nameEn", hotel.getNameEn());
+            map.put("address", hotel.getAddress());
+            map.put("city", hotel.getCity());
+            map.put("starRating", hotel.getStarRating());
+            map.put("description", hotel.getDescription());
+            map.put("surroundings", hotel.getSurroundings());
+            map.put("promotionInfo", hotel.getPromotionInfo());
+            map.put("facilities", hotel.getFacilities());
+            map.put("tags", hotel.getTags());
+            map.put("openDate", hotel.getOpenDate());
+            map.put("status", hotel.getStatus());
+            map.put("merchantId", hotel.getMerchantId());
+            map.put("images", hotel.getImages());
+            map.put("coverImage", hotel.getCoverImage());
+            map.put("minPrice", hotel.getMinPrice());
+            map.put("rejectReason", hotel.getRejectReason());
+            // 添加点评数量和收藏量（供Android端使用）
+            map.put("reviewCount", reviewService.getReviewCountByHotelId(hotel.getId()));
+            map.put("favoriteCount", favoriteService.getFavoriteCountByHotelId(hotel.getId()));
+            return map;
+        }).collect(Collectors.toList());
+        
+        Page<Map<String, Object>> resultPage = new Page<>(hotelPage.getCurrent(), hotelPage.getSize(), hotelPage.getTotal());
+        resultPage.setRecords(hotelList);
+        return Result.success(resultPage);
     }
 
     // Public: Hotel Detail
@@ -85,18 +125,49 @@ public class HotelController {
 
     // Merchant: List My Hotels
     @GetMapping("/my-list")
-    public Result<Page<Hotel>> myList(@RequestParam(defaultValue = "1") Integer pageNum,
+    public Result<Page<Map<String, Object>>> myList(@RequestParam(defaultValue = "1") Integer pageNum,
                                       @RequestParam(defaultValue = "10") Integer pageSize,
                                       @RequestParam Integer merchantId) {
         Page<Hotel> page = new Page<>(pageNum, pageSize);
         QueryWrapper<Hotel> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("merchant_id", merchantId);
-        return Result.success(hotelService.page(page, queryWrapper));
+        Page<Hotel> hotelPage = hotelService.page(page, queryWrapper);
+        
+        // 转换为包含统计信息的Map列表
+        List<Map<String, Object>> hotelList = hotelPage.getRecords().stream().map(hotel -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", hotel.getId());
+            map.put("name", hotel.getName());
+            map.put("nameEn", hotel.getNameEn());
+            map.put("address", hotel.getAddress());
+            map.put("city", hotel.getCity());
+            map.put("starRating", hotel.getStarRating());
+            map.put("description", hotel.getDescription());
+            map.put("surroundings", hotel.getSurroundings());
+            map.put("promotionInfo", hotel.getPromotionInfo());
+            map.put("facilities", hotel.getFacilities());
+            map.put("tags", hotel.getTags());
+            map.put("openDate", hotel.getOpenDate());
+            map.put("status", hotel.getStatus());
+            map.put("merchantId", hotel.getMerchantId());
+            map.put("images", hotel.getImages());
+            map.put("coverImage", hotel.getCoverImage());
+            map.put("minPrice", hotel.getMinPrice());
+            map.put("rejectReason", hotel.getRejectReason());
+            // 添加点评数量和收藏量
+            map.put("reviewCount", reviewService.getReviewCountByHotelId(hotel.getId()));
+            map.put("favoriteCount", favoriteService.getFavoriteCountByHotelId(hotel.getId()));
+            return map;
+        }).collect(Collectors.toList());
+        
+        Page<Map<String, Object>> resultPage = new Page<>(hotelPage.getCurrent(), hotelPage.getSize(), hotelPage.getTotal());
+        resultPage.setRecords(hotelList);
+        return Result.success(resultPage);
     }
 
     // Admin: List All Hotels (for audit)
     @GetMapping("/admin/list")
-    public Result<Page<Hotel>> adminList(@RequestParam(defaultValue = "1") Integer pageNum,
+    public Result<Page<Map<String, Object>>> adminList(@RequestParam(defaultValue = "1") Integer pageNum,
                                          @RequestParam(defaultValue = "10") Integer pageSize,
                                          @RequestParam(required = false) Integer status,
                                          @RequestParam(required = false) String name) {
@@ -108,7 +179,38 @@ public class HotelController {
         if (StrUtil.isNotBlank(name)) {
             queryWrapper.like("name", name);
         }
-        return Result.success(hotelService.page(page, queryWrapper));
+        Page<Hotel> hotelPage = hotelService.page(page, queryWrapper);
+        
+        // 转换为包含统计信息的Map列表
+        List<Map<String, Object>> hotelList = hotelPage.getRecords().stream().map(hotel -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", hotel.getId());
+            map.put("name", hotel.getName());
+            map.put("nameEn", hotel.getNameEn());
+            map.put("address", hotel.getAddress());
+            map.put("city", hotel.getCity());
+            map.put("starRating", hotel.getStarRating());
+            map.put("description", hotel.getDescription());
+            map.put("surroundings", hotel.getSurroundings());
+            map.put("promotionInfo", hotel.getPromotionInfo());
+            map.put("facilities", hotel.getFacilities());
+            map.put("tags", hotel.getTags());
+            map.put("openDate", hotel.getOpenDate());
+            map.put("status", hotel.getStatus());
+            map.put("merchantId", hotel.getMerchantId());
+            map.put("images", hotel.getImages());
+            map.put("coverImage", hotel.getCoverImage());
+            map.put("minPrice", hotel.getMinPrice());
+            map.put("rejectReason", hotel.getRejectReason());
+            // 添加点评数量和收藏量
+            map.put("reviewCount", reviewService.getReviewCountByHotelId(hotel.getId()));
+            map.put("favoriteCount", favoriteService.getFavoriteCountByHotelId(hotel.getId()));
+            return map;
+        }).collect(Collectors.toList());
+        
+        Page<Map<String, Object>> resultPage = new Page<>(hotelPage.getCurrent(), hotelPage.getSize(), hotelPage.getTotal());
+        resultPage.setRecords(hotelList);
+        return Result.success(resultPage);
     }
 
     // Admin: Audit Hotel
