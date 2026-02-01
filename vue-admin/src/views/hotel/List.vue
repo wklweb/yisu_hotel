@@ -53,7 +53,7 @@
                  <div class="info-text">
                      <div class="name">{{ scope.row.name }}</div>
                      <div class="address"><el-icon><Location /></el-icon> {{ scope.row.city }} {{ scope.row.address }}</div>
-                     <div class="price">¥ {{ scope.row.minPrice }} 起</div>
+                     <div class="price">¥ {{ scope.row.minPrice ?? 0 }} 起</div>
                  </div>
              </div>
            </template>
