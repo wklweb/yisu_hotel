@@ -8,7 +8,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBar"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="300dp"
         android:theme="@style/Theme.AppCompat.NoActionBar">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
@@ -17,20 +17,29 @@
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-            <ImageView
-                android:id="@+id/ivDetailImage"
+            <!-- Image Banner with ViewPager2 -->
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewPagerImages"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                app:layout_collapseMode="parallax"
-                android:src="@drawable/ic_launcher_background"/>
+                app:layout_collapseMode="parallax"/>
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabLayoutImages"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="8dp"
+                app:tabIndicatorHeight="0dp"
+                app:tabBackground="@drawable/bg_pill"/>
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
-                app:titleTextColor="#FFF"/>
+                app:titleTextColor="#FFF"
+                app:navigationIcon="?attr/homeAsUpIndicator"/>
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
@@ -104,6 +113,112 @@
                 android:layout_marginTop="8dp"
                 android:lineSpacingExtra="4dp"
                 android:textColor="#555"/>
+
+            <!-- 日历+人间夜选择 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="选择入住日期"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#333"
+                        android:layout_marginBottom="12dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackground"
+                            android:padding="8dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="入住"
+                                android:textSize="12sp"
+                                android:textColor="#999"/>
+                            <TextView
+                                android:id="@+id/tvDetailCheckIn"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="01月30日"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="#333"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="→"
+                            android:textSize="16sp"
+                            android:textColor="#999"
+                            android:layout_marginHorizontal="8dp"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="?attr/selectableItemBackground"
+                            android:padding="8dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="离店"
+                                android:textSize="12sp"
+                                android:textColor="#999"/>
+                            <TextView
+                                android:id="@+id/tvDetailCheckOut"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="01月31日"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="#333"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/tvDetailNights"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1晚"
+                            android:textSize="14sp"
+                            android:textColor="#2196F3"
+                            android:background="#E3F2FD"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp"
+                            android:layout_marginStart="8dp"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
             <View
                 android:layout_width="match_parent"
